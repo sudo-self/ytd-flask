@@ -23,23 +23,20 @@ def download_audio():
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-        'cookiefile': 'yt_cookies.txt',  # Make sure to provide the path to your cookies file
-        'extractor_args': {
-            'youtube': {
-                # Replace with actual Visitor Data if needed
-                # 'visitor_data': 'YOUR_VISITOR_DATA_HERE' 
-            }
-        }
+        'cookiefile': 'yt_cookies.txt',  # Adjust or remove if unnecessary
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
-            m4a_file_path = ydl.prepare_filename(info_dict).replace('.webm', '.m4a')
-            mp3_file_path = m4a_file_path.replace('.m4a', '.mp3')
-            m4r_file_path = m4a_file_path.replace('.m4a', '.m4r')
+            downloaded_file = ydl.prepare_filename(info_dict)
+            base_name, ext = os.path.splitext(downloaded_file)
 
-            # Convert m4a to mp3 and m4r using ffmpeg
+            m4a_file_path = f"{base_name}.m4a"
+            mp3_file_path = f"{base_name}.mp3"
+            m4r_file_path = f"{base_name}.m4r"
+
+            # Convert m4a to mp3 and m4r
             ffmpeg.input(m4a_file_path, ss=0, t=20).output(mp3_file_path).run(overwrite_output=True)
             ffmpeg.input(m4a_file_path, ss=0, t=20).output(m4r_file_path).run(overwrite_output=True)
 
@@ -60,6 +57,7 @@ def download_audio():
 
 if __name__ == '__main__':
     app.run(port=10000)
+
 
 
 
