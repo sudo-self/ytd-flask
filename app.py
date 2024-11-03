@@ -1,19 +1,12 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import yt_dlp
-import os
 import ffmpeg
-import logging
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
-@app.route('/')
-def index():
-    return "YT Ringtones"
+# Ensure the downloads directory exists
+os.makedirs('downloads', exist_ok=True)
 
 @app.route('/download', methods=['POST'])
 def download_audio():
@@ -30,7 +23,13 @@ def download_audio():
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
-        'cookiefile': 'yt_cookies.txt'
+        'cookiefile': 'yt_cookies.txt',  # Make sure to provide the path to your cookies file
+        'extractor_args': {
+            'youtube': {
+                # Replace with actual Visitor Data if needed
+                # 'visitor_data': 'YOUR_VISITOR_DATA_HERE' 
+            }
+        }
     }
 
     try:
@@ -38,8 +37,10 @@ def download_audio():
             info_dict = ydl.extract_info(url, download=True)
             m4a_file_path = ydl.prepare_filename(info_dict).replace('.webm', '.m4a')
             mp3_file_path = m4a_file_path.replace('.m4a', '.mp3')
-            ffmpeg.input(m4a_file_path, ss=0, t=20).output(mp3_file_path).run(overwrite_output=True)
             m4r_file_path = m4a_file_path.replace('.m4a', '.m4r')
+
+            # Convert m4a to mp3 and m4r using ffmpeg
+            ffmpeg.input(m4a_file_path, ss=0, t=20).output(mp3_file_path).run(overwrite_output=True)
             ffmpeg.input(m4a_file_path, ss=0, t=20).output(m4r_file_path).run(overwrite_output=True)
 
         return jsonify({
@@ -50,13 +51,16 @@ def download_audio():
             }
         })
 
+    except yt_dlp.utils.DownloadError as e:
+        if 'HTTP Error 429' in str(e):
+            return jsonify({'error': 'Too many requests. Please try again later.'}), 429
+        return jsonify({'error': str(e)}), 500
     except Exception as e:
-        logging.error(f"Error processing the audio: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    os.makedirs('./downloads', exist_ok=True)
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    app.run(port=10000)
+
 
 
 
