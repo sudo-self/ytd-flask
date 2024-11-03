@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS  # Import CORS
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import yt_dlp
 import os
 import ffmpeg
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
 @app.route('/')
 def index():
@@ -33,9 +33,11 @@ def download_audio():
             info_dict = ydl.extract_info(url, download=True)
             m4a_file_path = ydl.prepare_filename(info_dict).replace('.webm', '.m4a')
 
+            # Generate MP3 and trim to 20 seconds
             mp3_file_path = m4a_file_path.replace('.m4a', '.mp3')
-            ffmpeg.input(m4a_file_path).output(mp3_file_path).run(overwrite_output=True)
+            ffmpeg.input(m4a_file_path, ss=0, t=20).output(mp3_file_path).run(overwrite_output=True)
 
+            # Generate M4R and trim to 20 seconds
             m4r_file_path = m4a_file_path.replace('.m4a', '.m4r')
             ffmpeg.input(m4a_file_path, ss=0, t=20).output(m4r_file_path).run(overwrite_output=True)
 
@@ -53,4 +55,3 @@ def download_audio():
 if __name__ == '__main__':
     os.makedirs('./downloads', exist_ok=True)
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
-

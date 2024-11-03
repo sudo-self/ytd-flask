@@ -16,3 +16,5 @@ websockets==13.1
 Werkzeug==3.1.1
 yt-dlp==2024.10.22
 flask-cors
+ffmpeg-python==0.2.0
+
