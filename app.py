@@ -19,6 +19,9 @@ def download_audio():
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
 
+    # Path to your yt_cookies.txt file, ensure it's in the same directory
+    cookie_file_path = 'yt_cookies.txt'  # This should point to the correct cookie file
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': './downloads/%(title)s.%(ext)s',
@@ -26,6 +29,7 @@ def download_audio():
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',
         }],
+        'cookiefile': 'yt_cookies.txt'
     }
 
     try:
@@ -55,3 +59,4 @@ def download_audio():
 if __name__ == '__main__':
     os.makedirs('./downloads', exist_ok=True)
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+
