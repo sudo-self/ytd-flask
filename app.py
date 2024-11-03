@@ -3,9 +3,13 @@ from flask_cors import CORS
 import yt_dlp
 import os
 import ffmpeg
+import logging
 
 app = Flask(__name__)
 CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def index():
@@ -47,11 +51,13 @@ def download_audio():
         })
 
     except Exception as e:
+        logging.error(f"Error processing the audio: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     os.makedirs('./downloads', exist_ok=True)
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+
 
 
 
