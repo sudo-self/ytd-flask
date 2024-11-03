@@ -32,15 +32,15 @@ def download_audio():
             info_dict = ydl.extract_info(url, download=True)
             m4a_file_path = ydl.prepare_filename(info_dict).replace('.webm', '.m4a')
 
-            # Convert the m4a file to .mp3
+      
             mp3_file_path = m4a_file_path.replace('.m4a', '.mp3')
             ffmpeg.input(m4a_file_path).output(mp3_file_path).run(overwrite_output=True)
 
-            # Convert the m4a file to .m4r 
+          
             m4r_file_path = m4a_file_path.replace('.m4a', '.m4r')
             ffmpeg.input(m4a_file_path, ss=0, t=20).output(m4r_file_path).run(overwrite_output=True)
 
-        # Returning both files as attachments
+      
         return jsonify({
             'message': 'Files processed successfully.',
             'files': {
